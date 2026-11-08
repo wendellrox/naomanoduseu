@@ -1,0 +1,45 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+canvas { display: block; touch-action: none; }
+#hud {
+  position: fixed; top: 10px; left: 10px; z-index: 5;
+  background: rgba(8, 12, 20, 0.55); border: 1px solid rgba(120,180,255,0.25);
+  border-radius: 10px; padding: 10px 12px; min-width: 210px; backdrop-filter: blur(4px);
+}
+#hud .row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; margin: 2px 0; }
+#hud .small { font-size: 11px; opacity: .8; margin-top: 6px; display: block; }
+#crosshair {
+  position: fixed; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px; z-index: 4;
+  border: 1px solid rgba(180,220,255,.7); border-radius: 50%; pointer-events: none;
+}
+#crosshair::before, #crosshair::after { content: ""; position: absolute; background: rgba(180,220,255,.7); }
+#crosshair::before { left: 6px; top: -4px; width: 1px; height: 22px; }
+#crosshair::after { top: 6px; left: -4px; height: 1px; width: 22px; }
+#touch { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
+#stick {
+  position: absolute; left: 18px; bottom: 18px; width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18); pointer-events: auto; touch-action: none;
+}
+#nub {
+  position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px; border-radius: 50%;
+  background: rgba(120,180,255,.35); border: 1px solid rgba(160,210,255,.6);
+}
+#boost {
+  position: absolute; right: 18px; bottom: 28px; pointer-events: auto; touch-action: manipulation;
+  background: rgba(255,140,60,.25); color: #fff; border: 1px solid rgba(255,170,90,.7);
+  border-radius: 999px; padding: 14px 18px; font-weight: 700; letter-spacing: .04em;
+}
+#boost.active { background: rgba(255,140,60,.5); }
+#overlay {
+  position: fixed; inset: 0; display: grid; place-items: center; z-index: 10;
+  background: radial-gradient(ellipse at center, rgba(10,18,35,.75), rgba(0,0,0,.92));
+}
+.card {
+  max-width: 520px; margin: 16px; padding: 18px; border-radius: 14px;
+  background: rgba(12,18,30,.85); border: 1px solid rgba(120,180,255,.25);
+}
+.card h1 { margin: 0 0 8px; font-size: 22px; }
+.card p, .card li { color: #d7e6ff; line-height: 1.35; }
+#start { margin-top: 10px; width: 100%; padding: 12px; font-size: 16px; font-weight: 700; border-radius: 10px; border: 0; background: #3a86ff; color: #fff; }
+@media (pointer: fine) { #touch { display: none; } }

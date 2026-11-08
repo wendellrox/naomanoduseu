@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b0713" />
+    <meta
+      name="description"
+      content="Monster Stunt Arena — jogo 3D de manobras com monster truck: saltos, mortais e carros para esmagar."
+    />
+    <title>Monster Stunt Arena</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script>
+      // Detecta aparelhos com toque antes do CSS carregar para evitar piscar.
+      (function () {
+        var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        var touch = (navigator.maxTouchPoints || 0) > 0 || 'ontouchstart' in window || coarse;
+        if (touch) document.documentElement.classList.add('touch');
+        window.__msaTouch = touch;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="game"></div>
+
+    <div id="hud">
+      <div id="hud-top">
+        <div class="hud-block score">
+          <span class="label">PONTOS</span>
+          <span class="value" id="score">0</span>
+          <span id="combo"></span>
+        </div>
+        <div class="hud-block timer">
+          <span class="label">TEMPO</span>
+          <span class="value" id="time">1:40</span>
+        </div>
+        <div id="hud-right">
+          <button id="muteBtn" class="icon-btn" aria-label="Ligar ou desligar som">🔊</button>
+          <button id="resetBtn" class="icon-btn" aria-label="Recuperar caminhão">↺</button>
+        </div>
+      </div>
+
+      <div id="air">
+        <b id="airtime">0.0s</b>
+        <span>NO AR</span>
+      </div>
+
+      <div id="popups"></div>
+
+      <div id="speedo">
+        <span id="speed">0</span>
+        <small>KM/H</small>
+        <div id="speedbar"><i id="speedfill"></i></div>
+      </div>
+    </div>
+
+    <div id="touch">
+      <div id="joy" class="joy" aria-label="Joystick de direção">
+        <span class="joy-mark left">◀</span>
+        <span class="joy-mark right">▶</span>
+        <div class="joy-knob" id="joyKnob"></div>
+      </div>
+      <div class="pad right">
+        <button class="btn gas" data-act="gas" aria-label="Acelerar">▲</button>
+        <button class="btn brake" data-act="brake" aria-label="Frear ou dar ré">▼</button>
+      </div>
+    </div>
+
+    <div id="tricks">
+      <button class="trick" data-act="flipFront" aria-label="Mortal para frente">
+        <span>↺</span><small>FRENTE</small>
+      </button>
+      <button class="trick" data-act="flipBack" aria-label="Mortal para trás">
+        <span>↻</span><small>TRÁS</small>
+      </button>
+    </div>
+
+    <div id="start" class="overlay">
+      <div class="panel">
+        <div class="kicker">ARENA DE DEMOLIÇÃO</div>
+        <h1>MONSTER<br /><span>STUNT</span></h1>
+        <p class="tag">
+          Acelera, decola e faz mortais com o caminhão mais bruto da arena. Esmaga os carros e
+          quebra o recorde.
+        </p>
+        <div class="hints hints-key">
+          <span><b>WASD / setas</b> para dirigir</span>
+          <span><b>No ar:</b> Q / E ou os botões centrais para mortais</span>
+          <span><b>Pise nos carros</b> para esmagar e pontuar</span>
+          <span><b>R</b> recupera o caminhão se ele capotar</span>
+        </div>
+        <div class="hints hints-touch">
+          <span><b>Joystick</b> à esquerda para virar</span>
+          <span><b>▲ acelera</b> e <b>▼ freia</b> do lado direito</span>
+          <span><b>No ar:</b> toque em ↺ / ↻ para mortais</span>
+          <span><b>Pise nos carros</b> para esmagar e pontuar</span>
+        </div>
+        <button id="playBtn" class="cta">Jogar</button>
+        <div class="bestline">RECORDE <b id="startBest">0</b></div>
+      </div>
+    </div>
+
+    <div id="over" class="overlay hidden">
+      <div class="panel">
+        <div class="kicker">FIM DO TEMPO</div>
+        <h2>PONTUAÇÃO</h2>
+        <div class="final" id="finalScore">0</div>
+        <div class="stats">
+          <div>
+            <span>RECORDE</span>
+            <b id="finalBest">0</b>
+          </div>
+          <div>
+            <span>MELHOR MANOBRA</span>
+            <b id="finalTrick">—</b>
+          </div>
+        </div>
+        <button id="againBtn" class="cta">Jogar de novo</button>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

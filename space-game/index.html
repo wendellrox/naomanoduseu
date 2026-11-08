@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Space Game — Protótipo</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="hud">
+    <div class="row"><span>Velocidade</span><strong id="speed">0</strong></div>
+    <div class="row"><span>Sistema</span><strong id="system">—</strong></div>
+    <div class="row"><span>Alvo</span><strong id="target">—</strong></div>
+    <div class="row small" id="hint">Toque/arraste para olhar • Joystick para mover • Botão para turbo</div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="touch">
+    <div id="stick"><div id="nub"></div></div>
+    <button id="boost" type="button">TURBO</button>
+  </div>
+  <div id="overlay">
+    <div class="card">
+      <h1>Protótipo Estilo No Man's Sky</h1>
+      <p>Voe pelo espaço, explore planetas gerados proceduralmente e salte entre sistemas.</p>
+      <ul>
+        <li><b>PC:</b> Mouse para olhar, W/S acelerar, A/D rolar, Shift turbo, Espaço saltar sistema.</li>
+        <li><b>Celular:</b> Arraste para olhar, joystick para mover, TURBO para impulso.</li>
+      </ul>
+      <button id="start" type="button">Iniciar</button>
+    </div>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
