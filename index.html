@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0f172a" />
+<title>Pie Game · Jogo da Velha</title>
+<style>
+  :root {
+    --bg: #0b1120;
+    --board: #131c31;
+    --cell: #1b2740;
+    --cell-hover: #23324f;
+    --x: #38bdf8;
+    --o: #fb7185;
+    --text: #e2e8f0;
+    --muted: #8ea0bd;
+    --line: #2a3a58;
+    --win: #fbbf24;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(1000px 600px at 15% -10%, #1e3a5f 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 110%, #3b1d3a 0%, transparent 55%),
+      var(--bg);
+  }
+
+  .game {
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: clamp(1.6rem, 6vw, 2.1rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--x), #a78bfa 55%, var(--o));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    margin: 0 0 18px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .mode {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(19, 28, 49, 0.7);
+  }
+
+  .mode button {
+    border: 0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .mode button[aria-pressed="true"] {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.22), rgba(251, 113, 133, 0.22));
+    color: var(--text);
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .score {
+    padding: 10px 8px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(19, 28, 49, 0.65);
+  }
+
+  .score span {
+    display: block;
+  }
+
+  .score .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .score .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  #scoreX .value { color: var(--x); }
+  #scoreO .value { color: var(--o); }
+  #scoreDraw .value { color: var(--muted); }
+
+  .status {
+    min-height: 3.2em;
+    margin: 0 0 12px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .status .player-x { color: var(--x); }
+  .status .player-o { color: var(--o); }
+
+  .status .restart {
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(19, 28, 49, 0.75);
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.9);
+    margin-bottom: 18px;
+  }
+
+  .cell {
+    position: relative;
+    aspect-ratio: 1;
+    border: 0;
+    padding: 0;
+    border-radius: 14px;
+    background: var(--cell);
+    color: var(--text);
+    font: inherit;
+    font-size: clamp(2.2rem, 13vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .cell:not(.taken):not(:disabled):hover { background: var(--cell-hover); }
+  }
+
+  .cell:not(:disabled):active { transform: scale(0.96); }
+  .cell:disabled { cursor: default; }
+
+  .cell.x { color: var(--x); text-shadow: 0 0 22px rgba(56, 189, 248, 0.45); }
+  .cell.o { color: var(--o); text-shadow: 0 0 22px rgba(251, 113, 133, 0.45); }
+
+  .cell.win {
+    background: rgba(251, 191, 36, 0.16);
+    box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.75);
+    animation: pulse 1.1s ease-in-out infinite alternate;
+  }
+
+  .cell .mark {
+    display: inline-block;
+    animation: pop 0.18s ease-out;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse {
+    from { box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.45); }
+    to { box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.95); }
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    border: 1px solid var(--line);
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--cell);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:hover { background: var(--cell-hover); }
+  .btn:active { transform: scale(0.98); }
+
+  .btn.primary {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(167, 139, 250, 0.9));
+    border-color: transparent;
+    color: #08111f;
+  }
+
+  .btn.primary:hover { filter: brightness(1.08); }
+
+  .footer {
+    margin-top: 16px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="game">
+  <h1>Pie Game</h1>
+  <p class="subtitle">Jogo da Velha · três em linha e você vence</p>
+
+  <div class="mode" role="group" aria-label="Modo de jogo">
+    <button type="button" id="modePvp" aria-pressed="false">2 Jogadores</button>
+    <button type="button" id="modeCpu" aria-pressed="true">Contra a CPU</button>
+  </div>
+
+  <div class="scoreboard">
+    <div class="score" id="scoreX">
+      <span class="label" id="labelX">Você</span>
+      <span class="value" id="winsX">0</span>
+    </div>
+    <div class="score" id="scoreDraw">
+      <span class="label">Empates</span>
+      <span class="value" id="draws">0</span>
+    </div>
+    <div class="score" id="scoreO">
+      <span class="label" id="labelO">O</span>
+      <span class="value" id="winsO">0</span>
+    </div>
+  </div>
+
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <div class="board" id="board" role="grid" aria-label="Tabuleiro do jogo da velha"></div>
+
+  <div class="actions">
+    <button type="button" class="btn primary" id="newRound">Nova rodada</button>
+    <button type="button" class="btn" id="resetScore">Zerar placar</button>
+  </div>
+
+  <p class="footer">X sempre começa · reinício automático em 3s · teclas 1–9 jogam, R reinicia</p>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+
+  const boardEl = document.getElementById("board");
+  const statusEl = document.getElementById("status");
+  const modePvpBtn = document.getElementById("modePvp");
+  const modeCpuBtn = document.getElementById("modeCpu");
+  const newRoundBtn = document.getElementById("newRound");
+  const resetScoreBtn = document.getElementById("resetScore");
+  const winsXEl = document.getElementById("winsX");
+  const winsOEl = document.getElementById("winsO");
+  const drawsEl = document.getElementById("draws");
+  const labelXEl = document.getElementById("labelX");
+  const labelOEl = document.getElementById("labelO");
+
+  const cells = [];
+
+  const RESTART_MS = 3000;
+
+  let cpuTimer = null;
+  let restartTimer = null;
+  let restartInterval = null;
+  let restartEnd = 0;
+
+  const state = {
+    board: Array(9).fill(""),
+    turn: "X",
+    over: false,
+    mode: "cpu", // "pvp" | "cpu"
+    scores: { X: 0, O: 0, draw: 0 }
+  };
+
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cell";
+    cell.dataset.index = String(i);
+    cell.setAttribute("role", "gridcell");
+    cell.setAttribute("aria-label", `Casa ${i + 1}: vazia`);
+    cell.addEventListener("click", () => handleCellClick(i));
+    boardEl.appendChild(cell);
+    cells.push(cell);
+  }
+
+  function playerName(player) {
+    if (state.mode === "cpu") return player === "O" ? "CPU" : "Você";
+    return player;
+  }
+
+  function setStatus(html) {
+    statusEl.innerHTML = html;
+  }
+
+  function playerTag(player) {
+    return `<span class="player-${player.toLowerCase()}">${playerName(player)}</span>`;
+  }
+
+  function updateStatus() {
+    if (state.over) return;
+    if (state.mode === "cpu") {
+      setStatus(state.turn === "X" ? `Sua vez, ${playerTag("X")}` : "Vez da CPU pensando…");
+    } else {
+      setStatus(`Vez de ${playerTag(state.turn)}`);
+    }
+  }
+
+  function renderScores() {
+    winsXEl.textContent = String(state.scores.X);
+    winsOEl.textContent = String(state.scores.O);
+    drawsEl.textContent = String(state.scores.draw);
+    labelXEl.textContent = state.mode === "cpu" ? "Você" : "X";
+    labelOEl.textContent = state.mode === "cpu" ? "CPU" : "O";
+  }
+
+  function render() {
+    cells.forEach((cell, i) => {
+      const mark = state.board[i];
+      cell.classList.toggle("taken", Boolean(mark));
+      cell.classList.toggle("x", mark === "X");
+      cell.classList.toggle("o", mark === "O");
+      const label = mark ? `Casa ${i + 1}: ${playerName(mark)}` : `Casa ${i + 1}: vazia`;
+      cell.setAttribute("aria-label", label);
+      cell.disabled = state.over || Boolean(mark) || isCpuThinking();
+
+      if (mark) {
+        if (cell.dataset.shown !== mark) {
+          cell.innerHTML = "";
+          const span = document.createElement("span");
+          span.className = "mark";
+          span.textContent = mark;
+          cell.appendChild(span);
+          cell.dataset.shown = mark;
+        }
+      } else if (cell.dataset.shown) {
+        cell.innerHTML = "";
+        delete cell.dataset.shown;
+      }
+    });
+  }
+
+  function isCpuThinking() {
+    return state.mode === "cpu" && state.turn === "O" && !state.over;
+  }
+
+  function winnerOf(board) {
+    for (const line of LINES) {
+      const [a, b, c] = line;
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return { player: board[a], line };
+      }
+    }
+    return null;
+  }
+
+  function emptyIndices(board) {
+    const out = [];
+    for (let i = 0; i < 9; i++) if (!board[i]) out.push(i);
+    return out;
+  }
+
+  function cancelRestart() {
+    if (restartTimer !== null) {
+      clearTimeout(restartTimer);
+      restartTimer = null;
+    }
+    if (restartInterval !== null) {
+      clearInterval(restartInterval);
+      restartInterval = null;
+    }
+  }
+
+  // Mostra o resultado e já agenda a próxima rodada (jogo contínuo).
+  function scheduleRestart(message) {
+    cancelRestart();
+    restartEnd = Date.now() + RESTART_MS;
+
+    const tick = () => {
+      const secondsLeft = Math.max(1, Math.ceil((restartEnd - Date.now()) / 1000));
+      setStatus(`${message}<span class="restart">Nova rodada em ${secondsLeft}s</span>`);
+    };
+
+    tick();
+    restartInterval = setInterval(tick, 150);
+    restartTimer = setTimeout(() => {
+      cancelRestart();
+      newRound();
+    }, RESTART_MS);
+  }
+
+  function finish(result) {
+    state.over = true;
+    render();
+
+    let message;
+
+    if (result.player) {
+      state.scores[result.player]++;
+      renderScores();
+      result.line.forEach((i) => cells[i].classList.add("win"));
+
+      if (state.mode === "cpu") {
+        message = result.player === "X"
+          ? "Você ganhou! 🎉"
+          : "Você perdeu! 🤖";
+      } else {
+        message = `${playerTag(result.player)} ganhou! 🎉`;
+      }
+    } else {
+      state.scores.draw++;
+      renderScores();
+      message = "Empate! Deu velha.";
+    }
+
+    scheduleRestart(message);
+  }
+
+  function place(index) {
+    state.board[index] = state.turn;
+    const result = winnerOf(state.board);
+    const remaining = emptyIndices(state.board).length;
+
+    state.turn = state.turn === "X" ? "O" : "X";
+    render();
+
+    if (result) {
+      finish(result);
+      return;
+    }
+    if (remaining === 0) {
+      finish({ player: null, line: [] });
+      return;
+    }
+
+    updateStatus();
+
+    if (state.mode === "cpu" && state.turn === "O") {
+      cpuTimer = setTimeout(cpuMove, 420);
+    }
+  }
+
+  function handleCellClick(index) {
+    if (state.over || state.board[index]) return;
+    if (state.mode === "cpu" && state.turn === "O") return;
+    place(index);
+  }
+
+  // Minimax puro é suficiente para 9 casas: a CPU joga sempre o melhor lance.
+  function minimax(board, player) {
+    const result = winnerOf(board);
+    if (result) return { score: result.player === "O" ? 10 : -10 };
+    if (emptyIndices(board).length === 0) return { score: 0 };
+
+    const maximizing = player === "O";
+    let best = { score: maximizing ? -Infinity : Infinity, index: -1 };
+
+    for (const index of emptyIndices(board)) {
+      board[index] = player;
+      const score = minimax(board, player === "O" ? "X" : "O").score;
+      board[index] = "";
+
+      if (maximizing ? score > best.score : score < best.score) {
+        best = { score, index };
+      }
+    }
+    return best;
+  }
+
+  function cpuMove() {
+    cpuTimer = null;
+    if (state.over || state.turn !== "O") return;
+    const choice = minimax(state.board.slice(), "O");
+    const index = choice.index === -1
+      ? emptyIndices(state.board)[0]
+      : choice.index;
+    place(index);
+  }
+
+  function clearWins() {
+    cells.forEach((cell) => cell.classList.remove("win"));
+  }
+
+  function newRound() {
+    cancelRestart();
+    if (cpuTimer !== null) {
+      clearTimeout(cpuTimer);
+      cpuTimer = null;
+    }
+    state.board = Array(9).fill("");
+    state.turn = "X";
+    state.over = false;
+    clearWins();
+    cells.forEach((cell) => {
+      cell.disabled = false;
+      cell.classList.remove("win", "x", "o", "taken");
+      cell.innerHTML = "";
+      delete cell.dataset.shown;
+    });
+    render();
+    updateStatus();
+  }
+
+  function setMode(mode) {
+    if (state.mode === mode) return;
+    state.mode = mode;
+    state.scores = { X: 0, O: 0, draw: 0 };
+    modePvpBtn.setAttribute("aria-pressed", String(mode === "pvp"));
+    modeCpuBtn.setAttribute("aria-pressed", String(mode === "cpu"));
+    renderScores();
+    newRound();
+  }
+
+  modePvpBtn.addEventListener("click", () => setMode("pvp"));
+  modeCpuBtn.addEventListener("click", () => setMode("cpu"));
+  newRoundBtn.addEventListener("click", newRound);
+  resetScoreBtn.addEventListener("click", () => {
+    state.scores = { X: 0, O: 0, draw: 0 };
+    renderScores();
+    newRound();
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "r" || event.key === "R") newRound();
+    const n = Number(event.key);
+    if (n >= 1 && n <= 9) {
+      const cell = cells[n - 1];
+      if (!cell.disabled) cell.click();
+    }
+  });
+
+  renderScores();
+  newRound();
+})();
+</script>
+</body>
+</html>
